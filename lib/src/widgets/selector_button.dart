@@ -17,6 +17,8 @@ class SelectorButton extends StatelessWidget {
   final String? locale;
   final bool isEnabled;
   final bool isScrollControlled;
+  final Future<Country?> Function(BuildContext, List<Country>)?
+      phoneInputSelectorType;
 
   final ValueChanged<Country?> onCountryChanged;
 
@@ -32,6 +34,7 @@ class SelectorButton extends StatelessWidget {
     required this.onCountryChanged,
     required this.isEnabled,
     required this.isScrollControlled,
+    this.phoneInputSelectorType,
   }) : super(key: key);
 
   @override
@@ -69,13 +72,18 @@ class SelectorButton extends StatelessWidget {
             onPressed: countries.isNotEmpty && countries.length > 1 && isEnabled
                 ? () async {
                     Country? selected;
-                    if (selectorConfig.selectorType ==
-                        PhoneInputSelectorType.BOTTOM_SHEET) {
-                      selected = await showCountrySelectorBottomSheet(
-                          context, countries);
-                    } else {
+                    if (phoneInputSelectorType != null) {
                       selected =
-                          await showCountrySelectorDialog(context, countries);
+                          await phoneInputSelectorType!(context, countries);
+                    } else {
+                      if (selectorConfig.selectorType ==
+                          PhoneInputSelectorType.BOTTOM_SHEET) {
+                        selected = await showCountrySelectorBottomSheet(
+                            context, countries);
+                      } else {
+                        selected =
+                            await showCountrySelectorDialog(context, countries);
+                      }
                     }
 
                     if (selected != null) {
